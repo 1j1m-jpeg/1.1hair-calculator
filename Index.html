@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CVD Hair · Quote Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0a14;
+    --surface: #1a1326;
+    --card: #221a30;
+    --card2: #2a2038;
+    --accent: #c084fc;
+    --accent2: #e879f9;
+    --gold: #f0c060;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #f3e8ff;
+    --muted: #9d8ab5;
+    --border: #3d2f55;
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* ─── BG ORBS ─── */
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(80px); opacity: .18; pointer-events: none; z-index: 0;
+  }
+  .orb1 { width: 280px; height: 280px; background: #9333ea; top: -60px; right: -60px; }
+  .orb2 { width: 220px; height: 220px; background: #ec4899; bottom: 80px; left: -60px; }
+
+  /* ─── LAYOUT ─── */
+  #app { position: relative; z-index: 1; max-width: 430px; margin: 0 auto; padding-bottom: 100px; }
+
+  /* ─── HEADER ─── */
+  header {
+    padding: 20px 20px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; letter-spacing: -.5px; }
+  .logo span { color: var(--accent2); }
+  .header-tag {
+    font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px;
+  }
+
+  /* ─── SECTION TITLES ─── */
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted); padding: 22px 20px 10px;
+  }
+
+  /* ─── MARGIN SLIDER ─── */
+  .margin-card {
+    margin: 0 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .margin-top {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+  }
+  .margin-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .margin-value {
+    font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--gold);
+  }
+  .margin-value span { font-size: 13px; color: var(--muted); font-weight: 400; font-family: 'DM Sans', sans-serif; }
+
+  .slider-wrap { position: relative; }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; outline: none;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--pct, 50%), var(--border) var(--pct, 50%));
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: white; border: 3px solid var(--accent); box-shadow: 0 0 10px rgba(192,132,252,.5);
+  }
+  .slider-labels { display: flex; justify-content: space-between; margin-top: 6px; }
+  .slider-labels span { font-size: 10px; color: var(--muted); }
+
+  .tier-pills { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .tier-pill {
+    font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); color: var(--muted); cursor: pointer; transition: all .2s;
+    background: transparent;
+  }
+  .tier-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ─── PRODUCT PICKER ─── */
+  .product-grid { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .product-row {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+    transition: border-color .2s;
+  }
+  .product-row.selected { border-color: var(--accent); background: var(--card2); }
+
+  .product-check {
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+    transition: all .2s; cursor: pointer;
+  }
+  .product-row.selected .product-check { background: var(--accent); border-color: var(--accent); }
+  .product-check svg { display: none; }
+  .product-row.selected .product-check svg { display: block; }
+
+  .product-info { flex: 1; }
+  .product-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .product-meta { font-size: 11px; color: var(--muted); }
+
+  .product-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .length-select, .qty-input, .color-select {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 5px 8px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+  }
+  .length-select { width: 78px; }
+  .color-select { width: 140px; }
+  .qty-input { width: 56px; text-align: center; }
+
+  /* ─── QUOTE SUMMARY ─── */
+  .quote-card {
+    margin: 0 16px;
+    background: linear-gradient(135deg, #2d1f45 0%, #1e1530 100%);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 0 40px rgba(192,132,252,.12);
+  }
+  .quote-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  }
+  .quote-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+  .quote-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--accent); color: #fff; padding: 3px 9px; border-radius: 12px;
+  }
+
+  .quote-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .quote-item {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; padding: 8px 12px; background: rgba(0,0,0,.2); border-radius: 10px;
+  }
+  .quote-item-name { color: var(--muted); flex: 1; }
+  .quote-item-detail { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .quote-item-price { font-weight: 600; color: var(--text); }
+
+  .quote-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .quote-totals { display: flex; flex-direction: column; gap: 6px; }
+  .quote-total-row { display: flex; justify-content: space-between; font-size: 13px; }
+  .quote-total-row.big {
+    font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+    color: var(--gold); margin-top: 4px;
+  }
+  .quote-profit { color: var(--green); font-size: 12px; }
+
+  /* ─── BUTTONS ─── */
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+  .btn {
+    flex: 1; padding: 13px; border-radius: 12px; font-size: 13px; font-weight: 600;
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif; transition: all .2s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); font-size: 12px; padding: 8px 14px; flex: none; border-radius: 10px; }
+  .btn-copy { background: var(--green); color: #0a1a0e; }
+  .btn-danger { background: var(--red); color: #fff; font-size: 11px; padding: 6px 12px; flex: none; }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    text-align: center; padding: 30px 20px; color: var(--muted); font-size: 13px;
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+
+  /* ─── CUSTOMER INFO ─── */
+  .customer-card {
+    margin: 0 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .input-field {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); border-radius: 10px; padding: 10px 14px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border-color .2s; margin-bottom: 10px;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--muted); }
+  .input-row { display: flex; gap: 8px; }
+  .input-row .input-field { margin-bottom: 0; }
+
+  /* ─── ADD PRODUCT MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 100;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 20px 40px;
+    width: 100%; max-width: 430px; transform: translateY(100%); transition: transform .35s cubic-bezier(.25,.46,.45,.94);
+    border-top: 1px solid var(--border);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-drag { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 18px; }
+  .modal-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; margin-top: 14px; }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: #0a1a0e; font-weight: 700; font-size: 13px;
+    padding: 10px 20px; border-radius: 30px; z-index: 200; opacity: 0;
+    transition: all .3s; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── BOTTOM NAV ─── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px; background: var(--surface);
+    border-top: 1px solid var(--border); display: flex; padding: 10px 0 20px;
+    z-index: 50;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600; letter-spacing: .5px; color: var(--muted);
+    cursor: pointer; padding: 6px; transition: color .2s; text-transform: uppercase;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-item svg { width: 20px; height: 20px; }
+
+  /* ─── PAGES ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── HISTORY ─── */
+  .history-item {
+    margin: 0 16px 10px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; cursor: pointer;
+  }
+  .history-item:active { opacity: .8; }
+  .history-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .history-name { font-weight: 600; font-size: 14px; }
+  .history-amount { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--gold); }
+  .history-meta { font-size: 11px; color: var(--muted); }
+
+  /* ─── SETTINGS ─── */
+  .settings-card {
+    margin: 0 16px 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px; border-bottom: 1px solid var(--border); gap: 12px;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { font-size: 14px; font-weight: 500; }
+  .settings-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .toggle {
+    width: 44px; height: 26px; background: var(--border); border-radius: 13px;
+    position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: ''; position: absolute; width: 20px; height: 20px; background: #fff;
+    border-radius: 50%; top: 3px; left: 3px; transition: left .2s;
+  }
+  .toggle.on::after { left: 21px; }
+
+  .color-dot {
+    width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 6px;
+  }
+  .color-picker-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 16px; }
+  .color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+    transition: border-color .2s;
+  }
+  .color-swatch.selected { border-color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div id="app">
+
+  <!-- ══════════════════ PAGE: QUOTE ══════════════════ -->
+  <div class="page active" id="page-quote">
+
+    <header>
+      <div class="logo">CVD <span>Hair</span></div>
+      <div class="header-tag">Quote Builder</div>
+    </header>
+
+    <!-- Customer -->
+    <div class="section-title">Client Info</div>
+    <div class="customer-card">
+      <input class="input-field" id="client-name" placeholder="Client name" />
+      <div class="input-row">
+        <input class="input-field" id="client-phone" placeholder="Phone / @handle" style="flex:1" />
+      </div>
+    </div>
+
+    <!-- Margin -->
+    <div class="section-title">Profit Margin</div>
+    <div class="margin-card">
+      <div class="margin-top">
+        <div class="margin-label">Markup on cost</div>
+        <div class="margin-value" id="margin-display">50% <span>margin</span></div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="margin-slider" min="10" max="120" value="50" step="5">
+      </div>
+      <div class="slider-labels"><span>10%</span><span>Budget</span><span>Standard</span><span>Premium</span><span>120%</span></div>
+      <div class="tier-pills">
+        <button class="tier-pill" onclick="setMargin(25)">+25%</button>
+        <button class="tier-pill active" onclick="setMargin(50)">+50%</button>
+        <button class="tier-pill" onclick="setMargin(80)">+80%</button>
+        <button class="tier-pill" onclick="setMargin(100)">+100%</button>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:16px">
+      <span>Select Products</span>
+      <button class="btn-ghost" onclick="openAddModal()">+ Add Product</button>
+    </div>
+    <div class="product-grid" id="product-grid"></div>
+
+    <!-- Quote -->
+    <div class="section-title">Quote Summary</div>
+    <div class="quote-card">
+      <div class="quote-header">
+        <div class="quote-title">Client Quote</div>
+        <div class="quote-badge" id="quote-badge">0 items</div>
+      </div>
+      <div class="quote-items" id="quote-items">
+        <div class="empty-state"><div class="icon">🛍️</div>Select products above to build a quote</div>
+      </div>
+      <div class="quote-divider"></div>
+      <div class="quote-totals" id="quote-totals"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="copyQuote()">📋 Copy Quote</button>
+        <button class="btn btn-secondary" onclick="saveQuote()">💾 Save</button>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-ghost" style="width:100%;background:rgba(74,222,128,.08);color:var(--green);border-color:rgba(74,222,128,.3)" onclick="sendWhatsApp()">📲 Send via WhatsApp</button>
+      </div>
+    </div>
+
+  </div><!-- /page-quote -->
+
+  <!-- ══════════════════ PAGE: HISTORY ══════════════════ -->
+  <div class="page" id="page-history">
+    <header><div class="logo">CVD <span>Hair</span></div><div class="header-tag">History</div></header>
+    <div class="section-title">Saved Quotes</div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- ══════════════════ PAGE: PRODUCTS ══════════════════ -->
+  <div class="page" id="page-products">
+    <header><div class="logo">CVD <span>Hair</span></div><div class="header-tag">Catalog</div></header>
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:16px">
+      <span>All Products</span>
+      <button class="btn-ghost" onclick="openAddModal()">+ Add</button>
+    </div>
+    <div id="catalog-list"></div>
+  </div>
+
+  <!-- ══════════════════ PAGE: SETTINGS ══════════════════ -->
+  <div class="page" id="page-settings">
+    <header><div class="logo">CVD <span>Hair</span></div><div class="header-tag">Settings</div></header>
+    <div class="section-title">Business</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div><div class="settings-label">Business Name</div><div class="settings-sub">Shown on quotes</div></div>
+        <input class="input-field" id="biz-name" placeholder="CVD Hair" style="width:140px;margin:0;font-size:12px" />
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Texture Upcharge</div><div class="settings-sub">Added to non-straight styles</div></div>
+        <select class="length-select" id="texture-upcharge-setting" style="width:80px">
+          <option value="0">None</option>
+          <option value="2" selected>+$2</option>
+          <option value="3">+$3</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Show Profit Info</div><div class="settings-sub">Display your margin on quote</div></div>
+        <div class="toggle on" id="show-profit-toggle" onclick="toggleSetting('showProfit')"></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Default Margin</div><div class="settings-sub">Starting markup %</div></div>
+        <select class="length-select" id="default-margin" style="width:80px">
+          <option value="25">25%</option>
+          <option value="50" selected>50%</option>
+          <option value="80">80%</option>
+          <option value="100">100%</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-title">Danger Zone</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div><div class="settings-label">Clear History</div><div class="settings-sub">Delete all saved quotes</div></div>
+        <button class="btn btn-danger" onclick="clearHistory()">Clear</button>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-label">Reset Catalog</div><div class="settings-sub">Restore default products</div></div>
+        <button class="btn btn-danger" onclick="resetCatalog()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="showPage('quote')" id="nav-quote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12h6M9 8h6M9 16h4"/></svg>
+    Quote
+  </div>
+  <div class="nav-item" onclick="showPage('history')" id="nav-history">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    History
+  </div>
+  <div class="nav-item" onclick="showPage('products')" id="nav-products">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/></svg>
+    Catalog
+  </div>
+  <div class="nav-item" onclick="showPage('settings')" id="nav-settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </div>
+</nav>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
+  <div class="modal">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="modal-title">Add Product</div>
+
+    <div class="modal-label">Product Name</div>
+    <input class="input-field" id="new-name" placeholder="e.g. Deep Wave" />
+
+    <div class="modal-label">Category / Type</div>
+    <input class="input-field" id="new-category" placeholder="e.g. Crochet Hair" />
+
+    <div class="modal-label">Available Lengths (inches, comma-separated)</div>
+    <input class="input-field" id="new-lengths" placeholder="12, 14, 16, 18, 20, 22, 24, 26, 28, 30" />
+
+    <div class="modal-label">Color / Tier</div>
+    <select class="input-field" id="new-color-tier">
+      <option value="natural_black">Natural Black</option>
+      <option value="1_4">1#–4#</option>
+      <option value="30_99j_33">30#/99J#/33#</option>
+      <option value="27_350">27#/350#</option>
+      <option value="613_hl">613#/Highlight/Ombré</option>
+    </select>
+
+    <div class="modal-label">Texture Upcharge</div>
+    <select class="input-field" id="new-upcharge">
+      <option value="0">None (Straight/Body Wave)</option>
+      <option value="2">+$2</option>
+      <option value="3">+$3</option>
+    </select>
+
+    <div class="modal-label">Notes (optional)</div>
+    <input class="input-field" id="new-notes" placeholder="e.g. Popular seller, limited stock" />
+
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+
+// Cost tables from the pricing sheet
+// Keys: natural_black, 1_4, 30_99j_33, 27_350, 613_hl
+const BASE_COSTS = {
+  natural_black: {12:56,14:61,16:66,18:70,20:80,22:84,24:95,26:106,28:111,30:121},
+  "1_4":         {12:57,14:61,16:68,18:73,20:82,22:89,24:99,26:108,28:117,30:126},
+  "30_99j_33":   {12:60,14:63,16:70,18:75,20:84,22:91,24:102,26:110,28:119,30:129},
+  "27_350":      {12:62,14:64,16:76,18:80,20:89,22:96,24:109,26:116,28:129,30:140},
+  "613_hl":      {12:63,14:69,16:80,18:85,20:97,22:106,24:119,26:130,28:143,30:179},
+};
+
+const COLOR_LABELS = {
+  natural_black: "Natural Black",
+  "1_4": "1#–4#",
+  "30_99j_33": "30#/99J#/33#",
+  "27_350": "27#/350#",
+  "613_hl": "613#/Highlight/Ombré",
+};
+
+const DEFAULT_PRODUCTS = [
+  {id:"p1", name:"Straight",      category:"Crochet Hair", colorTier:"natural_black", upcharge:0, notes:""},
+  {id:"p2", name:"Body Wave",     category:"Crochet Hair", colorTier:"natural_black", upcharge:0, notes:""},
+  {id:"p3", name:"Deep Wave",     category:"Crochet Hair", colorTier:"natural_black", upcharge:2, notes:""},
+  {id:"p4", name:"Kinky Curly",   category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p5", name:"Water Wave",    category:"Crochet Hair", colorTier:"natural_black", upcharge:2, notes:""},
+  {id:"p6", name:"Deep Curly",    category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p7", name:"Loose Wave",    category:"Crochet Hair", colorTier:"natural_black", upcharge:2, notes:""},
+  {id:"p8", name:"Kinky Straight",category:"Crochet Hair", colorTier:"natural_black", upcharge:2, notes:""},
+  {id:"p9", name:"Afro Curly 4C", category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p10",name:"Burmese Curly", category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p11",name:"Italian Curly", category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p12",name:"Loose Deep Wave",category:"Crochet Hair",colorTier:"natural_black", upcharge:2, notes:""},
+  {id:"p13",name:"Pixie Curly",   category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+  {id:"p14",name:"France Curly",  category:"Crochet Hair", colorTier:"natural_black", upcharge:3, notes:""},
+];
+
+// State
+let products = JSON.parse(localStorage.getItem('cvd_products') || 'null') || JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+let quotes   = JSON.parse(localStorage.getItem('cvd_quotes') || '[]');
+let settings = JSON.parse(localStorage.getItem('cvd_settings') || '{}');
+settings = Object.assign({showProfit:true, bizName:'CVD Hair', defaultMargin:50, textureUpcharge:2}, settings);
+
+let margin = settings.defaultMargin;
+let selections = {}; // productId -> {length, colorTier, qty}
+let editingProductId = null;
+
+function save() {
+  localStorage.setItem('cvd_products', JSON.stringify(products));
+  localStorage.setItem('cvd_quotes', JSON.stringify(quotes));
+  localStorage.setItem('cvd_settings', JSON.stringify(settings));
+}
+
+// ─────────────────────────────────────────────
+// NAV
+// ─────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'products') renderCatalog();
+}
+
+// ─────────────────────────────────────────────
+// MARGIN
+// ─────────────────────────────────────────────
+const slider = document.getElementById('margin-slider');
+slider.addEventListener('input', () => {
+  margin = parseInt(slider.value);
+  updateSliderFill();
+  document.getElementById('margin-display').innerHTML = margin + '% <span>markup</span>';
+  document.querySelectorAll('.tier-pill').forEach(p => p.classList.remove('active'));
+  renderQuote();
+});
+
+function updateSliderFill() {
+  const pct = ((margin - 10) / (120 - 10)) * 100;
+  slider.style.setProperty('--pct', pct + '%');
+}
+
+function setMargin(val) {
+  margin = val;
+  slider.value = val;
+  updateSliderFill();
+  document.getElementById('margin-display').innerHTML = val + '% <span>markup</span>';
+  document.querySelectorAll('.tier-pill').forEach(p => {
+    p.classList.toggle('active', parseInt(p.textContent) === val);
+  });
+  renderQuote();
+}
+
+// ─────────────────────────────────────────────
+// COST CALC
+// ─────────────────────────────────────────────
+function getCost(product, length, colorTier) {
+  const tier = colorTier || product.colorTier;
+  const costTable = BASE_COSTS[tier];
+  if (!costTable) return 0;
+  const base = costTable[parseInt(length)] || 0;
+  return base + (product.upcharge || 0);
+}
+
+function getSellPrice(cost) {
+  return Math.round(cost * (1 + margin / 100));
+}
+
+// ─────────────────────────────────────────────
+// PRODUCT GRID
+// ─────────────────────────────────────────────
+function renderProductGrid() {
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = '';
+  products.forEach(p => {
+    const sel = selections[p.id];
+    const isSelected = !!sel;
+    const lengths = Object.keys(BASE_COSTS[p.colorTier] || BASE_COSTS.natural_black).map(Number).sort((a,b)=>a-b);
+    const currentLength = sel?.length || lengths[2] || 16;
+    const currentColor = sel?.colorTier || p.colorTier;
+    const currentQty = sel?.qty || 1;
+
+    const div = document.createElement('div');
+    div.className = 'product-row' + (isSelected ? ' selected' : '');
+    div.id = 'row-' + p.id;
+
+    const lengthOpts = lengths.map(l => `<option value="${l}" ${l == currentLength ? 'selected' : ''}>${l}"</option>`).join('');
+    const colorOpts = Object.entries(COLOR_LABELS).map(([k,v]) => `<option value="${k}" ${k === currentColor ? 'selected' : ''}>${v}</option>`).join('');
+
+    const cost = getCost(p, currentLength, currentColor);
+    const sell = getSellPrice(cost);
+
+    div.innerHTML = `
+      <div class="product-check" onclick="toggleProduct('${p.id}')">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-meta">${p.category}${p.upcharge > 0 ? ' · +$'+p.upcharge+' texture' : ''}</div>
+        <div class="product-meta" style="color:var(--accent);margin-top:4px" id="price-tag-${p.id}">
+          Cost $${cost} → <b>Sell $${sell}</b>
+        </div>
+      </div>
+      <div class="product-controls">
+        <select class="color-select" id="color-${p.id}" onchange="updateSelection('${p.id}')">
+          ${colorOpts}
+        </select>
+        <select class="length-select" id="len-${p.id}" onchange="updateSelection('${p.id}')">
+          ${lengthOpts}
+        </select>
+        <input class="qty-input" type="number" min="1" max="20" value="${currentQty}" id="qty-${p.id}" onchange="updateSelection('${p.id}')" placeholder="Qty">
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function toggleProduct(id) {
+  if (selections[id]) {
+    delete selections[id];
+  } else {
+    const lenEl  = document.getElementById('len-' + id);
+    const colEl  = document.getElementById('color-' + id);
+    const qtyEl  = document.getElementById('qty-' + id);
+    selections[id] = {
+      length: lenEl?.value || '16',
+      colorTier: colEl?.value || products.find(p=>p.id===id)?.colorTier || 'natural_black',
+      qty: parseInt(qtyEl?.value || 1)
+    };
+  }
+  document.getElementById('row-' + id)?.classList.toggle('selected', !!selections[id]);
+  renderQuote();
+}
+
+function updateSelection(id) {
+  const lenEl  = document.getElementById('len-' + id);
+  const colEl  = document.getElementById('color-' + id);
+  const qtyEl  = document.getElementById('qty-' + id);
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  const length = lenEl?.value || '16';
+  const colorTier = colEl?.value || product.colorTier;
+  const qty = parseInt(qtyEl?.value || 1) || 1;
+
+  if (selections[id]) {
+    selections[id] = { length, colorTier, qty };
+  }
+
+  // Update price tag live
+  const cost = getCost(product, length, colorTier);
+  const sell = getSellPrice(cost);
+  const tag = document.getElementById('price-tag-' + id);
+  if (tag) tag.innerHTML = `Cost $${cost} → <b>Sell $${sell}</b>`;
+
+  renderQuote();
+}
+
+// ─────────────────────────────────────────────
+// QUOTE
+// ─────────────────────────────────────────────
+function renderQuote() {
+  const items = document.getElementById('quote-items');
+  const totals = document.getElementById('quote-totals');
+  const badge = document.getElementById('quote-badge');
+
+  const selectedIds = Object.keys(selections);
+  if (!selectedIds.length) {
+    items.innerHTML = '<div class="empty-state"><div class="icon">🛍️</div>Select products above to build a quote</div>';
+    totals.innerHTML = '';
+    badge.textContent = '0 items';
+    return;
+  }
+
+  let totalCost = 0, totalSell = 0, totalQty = 0;
+  let html = '';
+
+  selectedIds.forEach(id => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    const sel = selections[id];
+    const cost = getCost(product, sel.length, sel.colorTier);
+    const sell = getSellPrice(cost);
+    const qty = sel.qty || 1;
+    totalCost += cost * qty;
+    totalSell += sell * qty;
+    totalQty += qty;
+
+    html += `<div class="quote-item">
+      <div style="flex:1">
+        <div class="quote-item-name">${product.name} × ${qty}</div>
+        <div class="quote-item-detail">${COLOR_LABELS[sel.colorTier]} · ${sel.length}"</div>
+      </div>
+      <div class="quote-item-price">$${sell * qty}</div>
+    </div>`;
+  });
+
+  items.innerHTML = html;
+  badge.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
+
+  const profit = totalSell - totalCost;
+  const profitPct = totalCost > 0 ? Math.round((profit / totalCost) * 100) : 0;
+
+  let totHtml = `
+    <div class="quote-total-row"><span style="color:var(--muted)">Subtotal</span><span>$${totalSell}</span></div>
+    <div class="quote-total-row big"><span>Client Pays</span><span>$${totalSell}</span></div>
+  `;
+  if (settings.showProfit) {
+    totHtml += `<div class="quote-total-row quote-profit"><span>Your profit</span><span>$${profit} (${profitPct}%)</span></div>`;
+  }
+  totals.innerHTML = totHtml;
+
+  // Also update live price tags
+  products.forEach(p => {
+    const sel = selections[p.id];
+    if (!sel) return;
+    const cost = getCost(p, sel.length, sel.colorTier);
+    const sell = getSellPrice(cost);
+    const tag = document.getElementById('price-tag-' + p.id);
+    if (tag) tag.innerHTML = `Cost $${cost} → <b>Sell $${sell}</b>`;
+  });
+}
+
+// ─────────────────────────────────────────────
+// COPY / SHARE
+// ─────────────────────────────────────────────
+function buildQuoteText() {
+  const bizName = settings.bizName || 'CVD Hair';
+  const clientName = document.getElementById('client-name').value.trim() || 'Client';
+  const selectedIds = Object.keys(selections);
+  if (!selectedIds.length) return null;
+
+  let lines = [];
+  lines.push(`✨ ${bizName} — Quote for ${clientName}`);
+  lines.push('─────────────────────');
+
+  let totalSell = 0;
+  selectedIds.forEach(id => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    const sel = selections[id];
+    const cost = getCost(product, sel.length, sel.colorTier);
+    const sell = getSellPrice(cost);
+    const qty = sel.qty || 1;
+    totalSell += sell * qty;
+    lines.push(`• ${product.name} (${COLOR_LABELS[sel.colorTier]}, ${sel.length}") × ${qty}  →  $${sell * qty}`);
+  });
+
+  lines.push('─────────────────────');
+  lines.push(`💰 TOTAL: $${totalSell}`);
+  lines.push('');
+  lines.push('Payment methods accepted: Cash, Zelle, CashApp');
+  lines.push('Thank you for your business! 💜');
+  return lines.join('\n');
+}
+
+function copyQuote() {
+  const text = buildQuoteText();
+  if (!text) { showToast('Add items to your quote first'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('📋 Quote copied!')).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 Quote copied!');
+  });
+}
+
+function sendWhatsApp() {
+  const phone = document.getElementById('client-phone').value.trim().replace(/\D/g,'');
+  const text = buildQuoteText();
+  if (!text) { showToast('Add items first'); return; }
+  const encoded = encodeURIComponent(text);
+  const url = phone ? `https://wa.me/${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  window.open(url, '_blank');
+}
+
+function saveQuote() {
+  const selectedIds = Object.keys(selections);
+  if (!selectedIds.length) { showToast('Nothing to save'); return; }
+  const clientName = document.getElementById('client-name').value.trim() || 'Unknown Client';
+  const clientPhone = document.getElementById('client-phone').value.trim();
+
+  let totalSell = 0;
+  const items = selectedIds.map(id => {
+    const product = products.find(p => p.id === id);
+    if (!product) return null;
+    const sel = selections[id];
+    const cost = getCost(product, sel.length, sel.colorTier);
+    const sell = getSellPrice(cost);
+    const qty = sel.qty || 1;
+    totalSell += sell * qty;
+    return { name: product.name, colorTier: sel.colorTier, length: sel.length, qty, sell: sell*qty };
+  }).filter(Boolean);
+
+  quotes.unshift({
+    id: 'q' + Date.now(),
+    clientName, clientPhone,
+    items, totalSell,
+    margin,
+    date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
+  });
+  save();
+  showToast('💾 Quote saved!');
+}
+
+// ─────────────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────────────
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!quotes.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📂</div>No saved quotes yet</div>';
+    return;
+  }
+  el.innerHTML = quotes.map(q => `
+    <div class="history-item" onclick="loadQuoteText('${q.id}')">
+      <div class="history-top">
+        <div class="history-name">${q.clientName}</div>
+        <div class="history-amount">$${q.totalSell}</div>
+      </div>
+      <div class="history-meta">${q.date} · ${q.items.length} item${q.items.length>1?'s':''} · ${q.margin}% markup · ${q.clientPhone || 'No contact'}</div>
+    </div>
+  `).join('');
+}
+
+function loadQuoteText(id) {
+  const q = quotes.find(x => x.id === id);
+  if (!q) return;
+  const bizName = settings.bizName || 'CVD Hair';
+  let lines = [`✨ ${bizName} — Quote for ${q.clientName}`, '─────────────────────'];
+  q.items.forEach(i => lines.push(`• ${i.name} (${COLOR_LABELS[i.colorTier]||i.colorTier}, ${i.length}") × ${i.qty}  →  $${i.sell}`));
+  lines.push('─────────────────────', `💰 TOTAL: $${q.totalSell}`, '', 'Payment methods accepted: Cash, Zelle, CashApp', 'Thank you for your business! 💜');
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('📋 Copied!')).catch(() => showToast('Open quote to copy'));
+}
+
+// ─────────────────────────────────────────────
+// CATALOG MANAGEMENT
+// ─────────────────────────────────────────────
+function renderCatalog() {
+  const el = document.getElementById('catalog-list');
+  el.innerHTML = '';
+  products.forEach(p => {
+    const div = document.createElement('div');
+    div.style.cssText = 'margin:0 16px 10px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px';
+    div.innerHTML = `
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px;margin-bottom:3px">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${p.category} · ${COLOR_LABELS[p.colorTier]} ${p.upcharge>0?'· +$'+p.upcharge+' texture':''}</div>
+        ${p.notes ? `<div style="font-size:11px;color:var(--accent);margin-top:3px">${p.notes}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" style="font-size:11px;padding:6px 12px" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="deleteProduct('${p.id}')">✕</button>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  products = products.filter(p => p.id !== id);
+  delete selections[id];
+  save();
+  renderCatalog();
+  renderProductGrid();
+  renderQuote();
+  showToast('Deleted');
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingProductId = id;
+  document.getElementById('modal-title').textContent = 'Edit Product';
+  document.getElementById('modal-save-btn').textContent = 'Save Changes';
+  document.getElementById('new-name').value = p.name;
+  document.getElementById('new-category').value = p.category;
+  document.getElementById('new-lengths').value = '12,14,16,18,20,22,24,26,28,30';
+  document.getElementById('new-color-tier').value = p.colorTier;
+  document.getElementById('new-upcharge').value = p.upcharge;
+  document.getElementById('new-notes').value = p.notes || '';
+  openAddModal();
+}
+
+// ─────────────────────────────────────────────
+// ADD / EDIT MODAL
+// ─────────────────────────────────────────────
+function openAddModal() {
+  if (!editingProductId) {
+    document.getElementById('modal-title').textContent = 'Add Product';
+    document.getElementById('modal-save-btn').textContent = 'Add Product';
+    ['new-name','new-category','new-lengths','new-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('new-lengths').value = '12,14,16,18,20,22,24,26,28,30';
+    document.getElementById('new-color-tier').value = 'natural_black';
+    document.getElementById('new-upcharge').value = '0';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingProductId = null;
+}
+
+function closeModalIfBg(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function saveProduct() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { showToast('Product name required'); return; }
+
+  const product = {
+    id: editingProductId || 'p' + Date.now(),
+    name,
+    category: document.getElementById('new-category').value.trim() || 'Crochet Hair',
+    colorTier: document.getElementById('new-color-tier').value,
+    upcharge: parseInt(document.getElementById('new-upcharge').value) || 0,
+    notes: document.getElementById('new-notes').value.trim(),
+  };
+
+  if (editingProductId) {
+    const idx = products.findIndex(p => p.id === editingProductId);
+    if (idx >= 0) products[idx] = product;
+    showToast('✅ Product updated');
+  } else {
+    products.push(product);
+    showToast('✅ Product added');
+  }
+
+  save();
+  closeModal();
+  renderProductGrid();
+  renderCatalog();
+  renderQuote();
+}
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+function toggleSetting(key) {
+  settings[key] = !settings[key];
+  const el = document.getElementById('show-profit-toggle');
+  if (el) el.classList.toggle('on', settings.showProfit);
+  save();
+  renderQuote();
+}
+
+function clearHistory() {
+  if (!confirm('Delete all saved quotes?')) return;
+  quotes = [];
+  save();
+  renderHistory();
+  showToast('History cleared');
+}
+
+function resetCatalog() {
+  if (!confirm('Reset to default products? Custom products will be lost.')) return;
+  products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  selections = {};
+  save();
+  renderProductGrid();
+  renderCatalog();
+  renderQuote();
+  showToast('Catalog reset');
+}
+
+document.getElementById('biz-name').addEventListener('input', e => {
+  settings.bizName = e.target.value; save();
+});
+document.getElementById('default-margin').addEventListener('change', e => {
+  settings.defaultMargin = parseInt(e.target.value); save();
+});
+document.getElementById('texture-upcharge-setting').addEventListener('change', e => {
+  settings.textureUpcharge = parseInt(e.target.value); save();
+});
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  updateSliderFill();
+  renderProductGrid();
+  renderQuote();
+
+  // populate settings fields
+  document.getElementById('biz-name').value = settings.bizName || '';
+  document.getElementById('default-margin').value = settings.defaultMargin || 50;
+  document.getElementById('texture-upcharge-setting').value = settings.textureUpcharge ?? 2;
+  document.getElementById('show-profit-toggle').classList.toggle('on', settings.showProfit !== false);
+
+  // Re-render quote whenever margin changes (catch slider)
+  slider.addEventListener('input', () => {
+    products.forEach(p => {
+      const sel = selections[p.id];
+      if (!sel) return;
+      const cost = getCost(p, sel.length, sel.colorTier);
+      const sell = getSellPrice(cost);
+      const tag = document.getElementById('price-tag-' + p.id);
+      if (tag) tag.innerHTML = `Cost $${cost} → <b>Sell $${sell}</b>`;
+    });
+  });
+}
+
+init();
+</script>
+</body>
+</html>
